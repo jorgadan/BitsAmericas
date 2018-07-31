@@ -14,7 +14,9 @@ Pasos para ejecutar correctamete la Aplicación web:
 
   * composer install
 
-  * php bin/console doctrine:database:create
+  * sudo chmod -R 777 var/logs var/cache var/sessions 
 
-  * php bin/console doctrine:schema:update --force
+  * php bin/console cache:clear
+  
+  * sudo chmod -R 777 var/logs var/cache var/sessions 
 
