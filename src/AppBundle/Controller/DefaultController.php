@@ -22,7 +22,23 @@ class DefaultController extends Controller
      * @Route("/lanzamientos", name="lanzamientos")
      */
     public function lanzamientosAction(){
-        dump($this->getInformation('browse/new-releases'));die;
+        $this->get('session')->set('offset',0);
+        $lanzamientos = $this->getInformation('browse/new-releases');
+//        dump($lanzamientos);die;
+        return $this->render('AppBundle:Default:lanzamientos.html.twig',array(
+            'lanzamientos'=>$lanzamientos['albums']['items']
+        ));
+    }
+
+    /**
+     * @Route("/lanzamientos/siguiente", name="lanzamientos_siguiente")
+     */
+    public function siguienteAction(){
+        $lanzamientos = $this->getInformation('browse/new-releases');
+//        dump($lanzamientos);die;
+        return $this->render('AppBundle:Default:listar.html.twig',array(
+            'lanzamientos'=>$lanzamientos['albums']['items']
+        ));
     }
 
     private function authenticateSpotify(){
@@ -37,10 +53,12 @@ class DefaultController extends Controller
 
     private function getInformation($type){
         $client = new Client();
+        $offset = $this->get('session')->get('offset')?:0;
         $auth = $this->get('session')->get('auth');
-        $response = $client->get('https://api.spotify.com/v1/'.$type,array(
+        $response = $client->get('https://api.spotify.com/v1/'.$type.'?offset='.$offset.'&limit=12',array(
             'Authorization'=>$auth['token_type']." ".$auth['access_token']
         ))->send();
+        $this->get('session')->set('offset',$offset+20);
         return json_decode($response->getBody(true),true);
     }
 }

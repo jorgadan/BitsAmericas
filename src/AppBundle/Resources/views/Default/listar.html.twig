@@ -1,0 +1,18 @@
+{% for item in lanzamientos %}
+    {% if loop.index%3==0 %}
+        <div class="row">
+    {% endif %}
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">{{ item.name }}
+                <small class="pull-right">{{ item.release_date }}</small>
+            </div>
+            <div class="panel-body text-center">
+                <img style="width: 80%" src="{{ item.images.1.url }}" alt="album">
+            </div>
+        </div>
+    </div>
+    {% if loop.index%3==0 %}
+        </div>
+    {% endif %}
+{% endfor %}

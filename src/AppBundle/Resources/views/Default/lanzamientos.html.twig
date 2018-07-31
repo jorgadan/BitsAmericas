@@ -6,7 +6,21 @@
             <div id="welcome">
                 <h1><span>Lanzamientos</span></h1>
             </div>
-
+            <div id="principal" class="panel-group">
+                {% include 'AppBundle:Default:listar.html.twig' %}
+            </div>
+            <a href="javascript:void(0)" onclick="cargar()" class="btn btn-info">Cargar más lanzamientos</a>
         </div>
     </div>
+{% endblock %}
+{% block javascripts %}
+    <script>
+        function cargar() {
+            $.get('lanzamientos/siguiente',
+                function (success) {
+                    $('#principal').append(success);
+                }
+            )
+        }
+    </script>
 {% endblock %}
