@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div id="wrapper">
+        <div id="container">
+            <div id="welcome">
+                <h1><span>Lanzamientos</span></h1>
+            </div>
+            <div class="media">
+                <div class="media-left">
+                    <img src="{{ artist.images.1.url }}" class="media-object" style="width:180px">
+                </div>
+                <div class="media-body">
+                    <h4 class="media-heading">{{ artist.name }}</h4>
+                    <p><strong>Géneros: </strong>{{ artist.genres|join(', ') }}</p>
+                    <a href="{{ artist.external_urls.spotify }}" target="_blank" class="btn btn-info">Ir a la página del artista</a>
+                </div>
+            </div>
+            <hr>
+            <div id="principal" class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Foto</th>
+                        <th>Álbum</th>
+                        <th>Canción</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for song in songs %}
+                        <tr>
+                            <td><img src="{{ song.album.images.2.url }}" alt="album"></td>
+                            <td>{{ song.album.name }}</td>
+                            <td><a href="{{ song.external_urls.spotify }}">{{ song.name }}</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script>
+        function cargar() {
+            $.get('lanzamientos/siguiente',
+                function (success) {
+                    $('#principal').append(success);
+                }
+            )
+        }
+    </script>
+{% endblock %}

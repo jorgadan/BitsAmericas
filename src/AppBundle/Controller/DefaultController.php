@@ -5,7 +5,6 @@ namespace AppBundle\Controller;
 use Guzzle\Http\Client;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
 {
@@ -14,7 +13,6 @@ class DefaultController extends Controller
      */
     public function indexAction()
     {
-        $this->authenticateSpotify();
         return $this->render('default/index.html.twig');
     }
 
@@ -22,9 +20,9 @@ class DefaultController extends Controller
      * @Route("/lanzamientos", name="lanzamientos")
      */
     public function lanzamientosAction(){
-        $this->get('session')->set('offset',0);
-        $lanzamientos = $this->getInformation('browse/new-releases');
-//        dump($lanzamientos);die;
+        $offset = $this->get('session')->get('offset')?:0;
+        $lanzamientos = $this->getInformation('browse/new-releases?offset='.$offset.'&limit=12');
+        $this->get('session')->set('offset',$offset+12);
         return $this->render('AppBundle:Default:lanzamientos.html.twig',array(
             'lanzamientos'=>$lanzamientos['albums']['items']
         ));
@@ -34,12 +32,27 @@ class DefaultController extends Controller
      * @Route("/lanzamientos/siguiente", name="lanzamientos_siguiente")
      */
     public function siguienteAction(){
-        $lanzamientos = $this->getInformation('browse/new-releases');
-//        dump($lanzamientos);die;
+        $offset = $this->get('session')->get('offset')?:0;
+        $lanzamientos = $this->getInformation('browse/new-releases?offset='.$offset.'&limit=12');
+        $this->get('session')->set('offset',$offset+12);
         return $this->render('AppBundle:Default:listar.html.twig',array(
             'lanzamientos'=>$lanzamientos['albums']['items']
         ));
     }
+
+    /**
+     * @Route("/artista/{id}", name="artista")
+     */
+    public function artistaAction($id){
+        $this->get('session')->set('offset',0);
+        $artist = $this->getInformation("artists/$id");
+        $songs = $this->getInformation("artists/$id/top-tracks?country=CO");
+        return $this->render('AppBundle:Default:artista.html.twig',array(
+            'artist'=>$artist,
+            'songs'=>$songs['tracks']
+        ));
+    }
+
 
     private function authenticateSpotify(){
         $client = new Client();
@@ -52,13 +65,12 @@ class DefaultController extends Controller
     }
 
     private function getInformation($type){
+        $this->authenticateSpotify();
         $client = new Client();
-        $offset = $this->get('session')->get('offset')?:0;
         $auth = $this->get('session')->get('auth');
-        $response = $client->get('https://api.spotify.com/v1/'.$type.'?offset='.$offset.'&limit=12',array(
+        $response = $client->get('https://api.spotify.com/v1/'.$type,array(
             'Authorization'=>$auth['token_type']." ".$auth['access_token']
         ))->send();
-        $this->get('session')->set('offset',$offset+20);
         return json_decode($response->getBody(true),true);
     }
 }
